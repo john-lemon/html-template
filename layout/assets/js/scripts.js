@@ -6,4 +6,9 @@ $(document).ready(function(){
       }
     }
   });
-}); 
+
+  function getLoudMthfck() {
+    console.log('Shut up!')
+  }
+
+});
