@@ -61,20 +61,13 @@ gulp.task('sprite', function(){
   spriteData.pipe(gulp.dest('layout/media/images'));
 })
 
-gulp.task('default', function(){
-  gulp.run('coffee','scripts', 'stylus', 'sprite', 'compress');
-
+gulp.task('watch', function(){
   // Отслеживаем изменения в файлах
-  gulp.watch("layout/assets/js/*.js", function(event){
-    gulp.run('scripts');
-  });
-  gulp.watch("layout/assets/js/plugins/*.js", function(event){
-    gulp.run('compress');
-  });
-  gulp.watch("layout/assets/css/**/*", function(event){
-    gulp.run('stylus');
-  });
-  gulp.watch("layout/media/images/sprite/", function(event){
-    gulp.run('sprite');
-  });
+  gulp.watch("layout/assets/js/*.js",['scripts']);
+  gulp.watch("layout/assets/js/*.coffee",['coffee']);
+  gulp.watch("layout/assets/js/plugins/*.js",['compress'])
+  gulp.watch("layout/assets/css/**/*",['stylus'])
+  gulp.watch("layout/media/images/sprite/",['sprite'])
 });
+
+gulp.task('default', ['coffee','scripts', 'stylus', 'sprite', 'compress', 'watch']);
