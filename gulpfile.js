@@ -1,10 +1,19 @@
 var gulp = require('gulp');
+var coffee = require('gulp-coffee');
 var concat = require('gulp-concat');
 var stylus = require('gulp-stylus');
 var nib = require('nib');
 var rename = require('gulp-rename');
 var spritesmith = require('gulp.spritesmith');
+var uglify = require('gulp-uglify');
 
+
+gulp.task('coffee', function() {
+  gulp.src('layout/assets/js/*.coffee')
+    .pipe(coffee({bare: true}))
+    .pipe(concat('coffee.js'))
+    .pipe(gulp.dest('layout/assets/js/'))
+});
 
 gulp.task('scripts', function() {
   gulp.src('layout/assets/js/*.js')
@@ -12,10 +21,16 @@ gulp.task('scripts', function() {
     .pipe(gulp.dest('layout/media/js'))
 });
 
+gulp.task('compress', function() {
+  gulp.src('layout/assets/js/plugins/*.js')
+    .pipe(uglify())
+    .pipe(concat('plugins.js'))
+    .pipe(gulp.dest('layout/media/js'))
+});
+
 gulp.task('stylus', function () {
   gulp.src('layout/assets/css/blocks/*.styl')
     .pipe(stylus({use: [nib()]}))
-    // .pipe(rename({extname:'media-bs.styl'}))
     .pipe(rename({
       prefix: 'media-'
     }))
@@ -35,22 +50,31 @@ gulp.task('stylus', function () {
 });
 
 gulp.task('sprite', function(){
-  gulp.src('layout/media/images/sprite')
-    .pipe(spritesmith({
-      imgName: 'sprite.png',
-      imgPath: 'layout/media/images/',
-      cssName: 'sprite-mixins.styl',
-      cssTemplate: 'sprite_template/mixins.mustache',
-      cssVarMap: function (sprite) {
-        sprite.name = 's-' + sprite.name;
-      }
-    }))
-    .pipe(gulp.dest('layout/media/images/'));
+  var spriteData = gulp.src('layout/media/images/sprite/*.png').pipe(spritesmith({
+    imgName: 'sprite.png',
+    cssName: 'sprite-mixins.styl',
+    cssTemplate: 'sprite_template/mixins.mustache',
+    cssVarMap: function (sprite) {
+      sprite.name = 's-' + sprite.name;
+    }
+  }));
+  spriteData.pipe(gulp.dest('layout/media/images'));
 })
 
-// gulp.task('default', function() {
-//   gulp.run('scripts');
-//   gulp.run('stylus');
-// });
+gulp.task('default', function(){
+  gulp.run('coffee','scripts', 'stylus', 'sprite', 'compress');
 
-gulp.task('default', ['scripts', 'stylus']);
+  // Отслеживаем изменения в файлах
+  gulp.watch("layout/assets/js/*.js", function(event){
+    gulp.run('scripts');
+  });
+  gulp.watch("layout/assets/js/plugins/*.js", function(event){
+    gulp.run('compress');
+  });
+  gulp.watch("layout/assets/css/**/*", function(event){
+    gulp.run('stylus');
+  });
+  gulp.watch("layout/media/images/sprite/", function(event){
+    gulp.run('sprite');
+  });
+});

@@ -1,7 +1,3 @@
-alert(22);
-
-alert(33);
-
 $(document).ready(function(){
   $('.fancybox').fancybox({
     helpers		: {
